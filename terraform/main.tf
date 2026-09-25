@@ -17,6 +17,8 @@ resource "google_container_cluster" "primary" {
   name     = var.cluster_name
   location = var.zone
 
+  deletion_protection = false
+
   remove_default_node_pool = true
   initial_node_count       = 1
 
@@ -33,11 +35,12 @@ resource "google_container_node_pool" "primary_nodes" {
 
   node_config {
     machine_type = var.machine_type
-    disk_size_gb = 10
+    disk_size_gb = 25
 
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
       "https://www.googleapis.com/auth/monitoring",
+      "https://www.googleapis.com/auth/devstorage.read_only",
     ]
     preemptible = true
     metadata    = { disable-legacy-endpoints = "true" }

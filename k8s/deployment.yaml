@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: PLACEHOLDER
+        image: europe-west3-docker.pkg.dev/terraform-cicd-pipeline-509514/gke-demo-repo/gke-demo-app:latest
         ports:  #defines container ports
         - name: http
           containerPort: 8080   # is target port of service
