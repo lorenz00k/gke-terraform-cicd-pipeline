@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Python dependencies of the app image
+  - package-ecosystem: pip
+    directory: /app
+    schedule:
+      interval: weekly
+  # Dev tools (ruff, mypy, pytest)
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+  # Base image in the Dockerfile
+  - package-ecosystem: docker
+    directory: /app
+    schedule:
+      interval: weekly
+  # Versions of the actions used in the workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

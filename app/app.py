@@ -25,10 +25,10 @@ def health_check() -> tuple[Response, int]:
 @app.route("/random", methods=["GET"])
 def random_check() -> tuple[Response, int]:
     # Simulating a database connection check
-    db_status = "healthy" if random.choice([True, False]) else "unhealthy"
+    db_status = "healthy" if random.choice([True, False]) else "unhealthy" # nosec B311
 
     # Simulating a cache check
-    cache_status = "healthy" if random.choice([True, False]) else "unhealthy"
+    cache_status = "healthy" if random.choice([True, False]) else "unhealthy" # nosec B311
 
     overall_status = (
         "healthy" if db_status == "healthy" and cache_status == "healthy" else "unhealthy"
@@ -46,4 +46,5 @@ def counter() -> tuple[Response, int]:
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+ # Must listen on all interfaces so the container is reachable from outside
+    app.run(host="0.0.0.0", port=8080)  # nosec B104
