@@ -56,7 +56,7 @@ jobs:
           checkov -d .
           --framework terraform kubernetes dockerfile
           --skip-path terraform/.terraform
-          --compact --soft-fail
+          --compact
   image-scan:
     name: Container image scan (Trivy)
     runs-on: ubuntu-latest
