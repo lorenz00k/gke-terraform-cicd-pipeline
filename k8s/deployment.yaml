@@ -3,8 +3,9 @@ kind: Deployment
 metadata:
   name: app-deployment # name of the app
   namespace: gke-terra
-  checkov.io/skip1: CKV_K8S_43=Digest pinning not needed for a demo
-  checkov.io/skip2: CKV2_K8S_6=No NetworkPolicy until cluster network policy is enabled
+  annotations:
+    checkov.io/skip1: CKV_K8S_43=Digest pinning not needed for a demo
+    checkov.io/skip2: CKV_K8S_14=Tag is replaced by the commit SHA in the deploy workflow
 spec:
   replicas: 1
   selector:
