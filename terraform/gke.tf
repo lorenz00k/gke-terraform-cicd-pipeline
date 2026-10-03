@@ -1,44 +1,3 @@
-# VPC
-resource "google_compute_network" "vpc_network" {
-  name                    = "terraform-demo-network"
-  auto_create_subnetworks = false
-}
-
-# firewall
-resource "google_compute_firewall" "allow_internal" {
-  name    = "allow-firewall"
-  network = google_compute_network.vpc_network.id
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "tcp"
-    ports    = ["80", "443"]
-  }
-
-  # only traffic from inside the subnet
-  source_ranges = [google_compute_subnetwork.subnet.ip_cidr_range]
-}
-
-#Subnet
-resource "google_compute_subnetwork" "subnet" {
-  name          = "gke-subnet"
-  ip_cidr_range = "10.0.0.0/24"
-  region        = var.region
-  network       = google_compute_network.vpc_network.id
-
-  private_ip_google_access = true
-
-  # Network traffic metadata for troubleshooting / auditing
-  log_config {
-    aggregation_interval = "INTERVAL_10_MIN"
-    flow_sampling        = 0.5
-    metadata             = "INCLUDE_ALL_METADATA"
-  }
-}
-
 #cluster
 resource "google_container_cluster" "primary" {
   # checkov:skip=CKV_GCP_65: RBAC via Google Groups needs a Google Workspace group
@@ -125,11 +84,3 @@ resource "google_container_node_pool" "primary_nodes" {
     }
   }
 }
-
-resource "google_artifact_registry_repository" "repo" {
-  # checkov:skip=CKV_GCP_84: Google-managed encryption is sufficient for me
-  location      = var.region
-  repository_id = "gke-demo-repo"
-  format        = "DOCKER"
-}
-
