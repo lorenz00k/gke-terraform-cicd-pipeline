@@ -53,10 +53,10 @@ jobs:
       # fix or skip each finding on purpose, then remove --soft-fail.
       - name: Checkov (Terraform, Kubernetes, Dockerfile)
         run: >
-          checkov -d terraform -d k8s -d app
+          checkov -d .
+          --framework terraform kubernetes dockerfile
           --skip-path terraform/.terraform
-          --compact --soft-fail
-
+          --compact
   image-scan:
     name: Container image scan (Trivy)
     runs-on: ubuntu-latest

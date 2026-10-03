@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app-network-policy
+  namespace: gke-terra          # must be the same namespace as your pods
+spec:
+  podSelector:
+    matchLabels:
+      app: myApp                # applies to pods with this label (your Deployment's pods)
+  policyTypes:
+    - Ingress                   # this policy controls INCOMING traffic only
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080            # incoming traffic is allowed only on this port

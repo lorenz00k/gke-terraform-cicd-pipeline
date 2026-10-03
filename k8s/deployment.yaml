@@ -3,6 +3,9 @@ kind: Deployment
 metadata:
   name: app-deployment # name of the app
   namespace: gke-terra
+  annotations:
+    checkov.io/skip1: CKV_K8S_43=Digest pinning not needed for a demo
+    checkov.io/skip2: CKV_K8S_14=Tag is replaced by the commit SHA in the deploy workflow
 spec:
   replicas: 1
   selector:
@@ -13,13 +16,30 @@ spec:
       labels:
         app: myApp  #name of the pod(s)
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault # CKV_K8S_31
+      automountServiceAccountToken: false
+
       containers:
       - name: app
         image: europe-west3-docker.pkg.dev/terraform-cicd-pipeline-509514/gke-demo-repo/gke-demo-app:latest
+        imagePullPolicy: Always
+
         ports:  #defines container ports
         - name: http
           containerPort: 8080   # is target port of service
 
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL # removes all kernel rights. 
         resources:
             requests:
               memory: 128Mi
