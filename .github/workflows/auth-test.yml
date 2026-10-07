@@ -22,7 +22,8 @@ jobs:
           service_account: '${{vars.WIF_SERVICE_ACCOUNT}}'
           # setup gcloud
 
-          # check if it worked
-          run: gcloud auth list
+      # check if it worked
+      - name: Show active account
+        run: gcloud auth list
 
 
