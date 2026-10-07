@@ -1,0 +1,28 @@
+name: check-auth-workflow
+run-name: ${{github.actor}} is checking authentication workflow
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: 'write'     # that GitHub can issue the OIDC token
+  contents: 'read'
+
+jobs:
+  auth-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 'actions/checkout@v7'
+
+      # log into google cloud
+      - uses: 'google-github-actions/auth@v3'
+        with:
+          project_id: 'terraform-cicd-pipeline-509514'
+          workload_identity_provider: '${{vars.WIF_PROVIDER}}'
+          service_account: '${{vars.WIF_SERVICE_ACCOUNT}}'
+          # setup gcloud
+
+          # check if it worked
+          run: gcloud auth list
+
+
