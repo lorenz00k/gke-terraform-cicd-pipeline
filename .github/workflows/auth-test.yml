@@ -20,8 +20,10 @@ jobs:
           project_id: 'terraform-cicd-pipeline-509514'
           workload_identity_provider: '${{vars.WIF_PROVIDER}}'
           service_account: '${{vars.WIF_SERVICE_ACCOUNT}}'
-          # setup gcloud
-
+      
+      # make gcloud available and configured
+      - uses: 'google-github-actions/setup-gcloud@v3'
+      
       # check if it worked
       - name: Show active account
         run: gcloud auth list
