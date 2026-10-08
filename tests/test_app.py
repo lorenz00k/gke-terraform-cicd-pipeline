@@ -19,7 +19,7 @@ def test_default_returns_message_and_pod(client: FlaskClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     data = response.get_json()
-    assert data["message"] == "Hello from GKE!"
+    assert data["message"] == "Hello from GKE! v2!"
     assert isinstance(data["pod"], str) and data["pod"]
 
 
