@@ -78,14 +78,6 @@ jobs:
         run: kubectl apply -k k8s/
 
 
-      # step 4: post deploy check
-
-
-# TODO 5: google-github-actions/get-gke-credentials (cluster name + location)
-
-      # TODO 6: replace the placeholder tag in k8s/deployment.yaml with the SHA (sed)
-
-      # TODO 7: kubectl apply -f k8s/   (namespace first!)
-
-      # TODO 8: bash tests/post_deploy_test.sh <deployment> <service> gke-terra
-      #   it rolls back automatically on failure
+      # step 4: post deploy check -> rollback on failure
+      - name: 'post deploy check'
+        run: bash tests/post_deploy_test.sh app-deployment app-service gke-terra
