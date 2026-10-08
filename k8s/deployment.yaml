@@ -49,13 +49,13 @@ spec:
               cpu: 200m
         readinessProbe:
             httpGet:
-              path: /does-not-exist
+              path: /health
               port: http-container
             initialDelaySeconds: 2
             periodSeconds: 5
         livenessProbe:
             httpGet:
-              path: /does-not-exist
+              path: /health
               port: http-container
             initialDelaySeconds: 10
             periodSeconds: 10
