@@ -10,7 +10,7 @@ count = 0
 
 @app.route("/", methods=["GET"])
 def default() -> Response:
-    return jsonify({"message": "Hello from GKE!", "pod": socket.gethostname()})
+    return jsonify({"message": "Hello from GKE! v2!", "pod": socket.gethostname()})
 
 
 @app.route("/health", methods=["GET"])
