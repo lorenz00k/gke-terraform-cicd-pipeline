@@ -11,7 +11,7 @@ resource "google_container_cluster" "primary" {
   location = var.zone
 
   resource_labels = {
-    enviroment = "development"
+    environment = "development"
     team       = "lo"
   }
 
