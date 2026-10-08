@@ -1,0 +1,9 @@
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - networkpolicy.yaml
+  - service.yaml
+
+images:
+  - name: europe-west3-docker.pkg.dev/terraform-cicd-pipeline-509514/gke-demo-repo/gke-demo-app
+    newTag: latest # will be overriden in the deploy-pipeline
