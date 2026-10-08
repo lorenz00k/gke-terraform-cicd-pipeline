@@ -8,7 +8,7 @@ spec:
   selector:
     app: myApp
   ports:
-    - name: http
+    - name: http-service
       protocol: TCP
-      port: 8080
-      targetPort: http
+      port: 80  #service's port (the outside world uses)
+      targetPort: http-container  # points to the deployment.yaml port (container port)

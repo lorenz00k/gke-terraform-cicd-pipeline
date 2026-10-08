@@ -16,11 +16,13 @@ concurrency:
   group: deploy
   cancel-in-progress: false   # never cancel a deploy halfway
 
-env:
+env:  #must match with terraform/variables.tf
   PROJECT_ID: 'terraform-cicd-pipeline-509514'
-  REGION: 'europe-west3'
+  ZONE: 'europe-west3-a'
   REPOSITORY_ID: 'gke-demo-repo'     # of artifact registry
   IMAGE_NAME: 'gke-demo-app'
+  CLUSTER_NAME: 'gke-demo-cluster'
+
 
 jobs:
   deploying:
@@ -48,21 +50,34 @@ jobs:
       # step 2: build & push
       # configure docker for artifact registry
       - name: 'docker auth'
-        run: gcloud auth configure-docker ${{env.REGION}}-docker.pkg.dev
+        run: gcloud auth configure-docker ${{env.ZONE}}-docker.pkg.dev
       
       - name: 'set image uri'
-        run: echo "IMAGE_URI=${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY_ID}}/${{env.IMAGE_NAME}}:${{github.sha}}" >> "$GITHUB_ENV"
+        run: echo "IMAGE_PATH=${{env.ZONE}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY_ID}}/${{env.IMAGE_NAME}}" >> "$GITHUB_ENV"
 
       - name: 'build image'
-        run: docker build . --tag ${{env.IMAGE_URI}}
+        run: docker build . --tag ${{env.IMAGE_PATH}}:${{ github.sha }}
         working-directory: app
 
       - name: 'push image'
-        run: docker push ${{env.IMAGE_URI}}
+        run: docker push ${{env.IMAGE_PATH}}:${{ github.sha }}
 
       # step 3: deploy
- 
+      - name: 'get gke credentials'
+        uses: 'google-github-actions/get-gke-credentials@v3'
+        with:
+          cluster_name: ${{env.CLUSTER_NAME}}
+          location: ${{env.ZONE}}
+          project_id: ${{ env.PROJECT_ID }}
+
+      - name: 'set image version'
+        working-directory: k8s
+        run: kustomize edit set image ${{ env.IMAGE_PATH }}=${{ env.IMAGE_PATH }}:${{ github.sha }}
+
+      - name: 'kubectl apply manifest'
+        run: kubectl apply -k k8s/
 
 
-
-
+      # step 4: post deploy check -> rollback on failure
+      - name: 'post deploy check'
+        run: bash tests/post_deploy_test.sh app-deployment app-service gke-terra
