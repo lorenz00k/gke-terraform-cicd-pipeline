@@ -18,7 +18,7 @@ concurrency:
 
 env:  #must match with terraform/variables.tf
   PROJECT_ID: 'terraform-cicd-pipeline-509514'
-  REGION: 'europe-west3'
+  ZONE: 'europe-west3-a'
   REPOSITORY_ID: 'gke-demo-repo'     # of artifact registry
   IMAGE_NAME: 'gke-demo-app'
   CLUSTER_NAME: 'gke-demo-cluster'
@@ -50,10 +50,10 @@ jobs:
       # step 2: build & push
       # configure docker for artifact registry
       - name: 'docker auth'
-        run: gcloud auth configure-docker ${{env.REGION}}-docker.pkg.dev
+        run: gcloud auth configure-docker ${{env.ZONE}}-docker.pkg.dev
       
       - name: 'set image uri'
-        run: echo "IMAGE_PATH=${{env.REGION}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY_ID}}/${{env.IMAGE_NAME}}" >> "$GITHUB_ENV"
+        run: echo "IMAGE_PATH=${{env.ZONE}}-docker.pkg.dev/${{env.PROJECT_ID}}/${{env.REPOSITORY_ID}}/${{env.IMAGE_NAME}}" >> "$GITHUB_ENV"
 
       - name: 'build image'
         run: docker build . --tag ${{env.IMAGE_PATH}}:${{ github.sha }}
@@ -67,7 +67,7 @@ jobs:
         uses: 'google-github-actions/get-gke-credentials@v3'
         with:
           cluster_name: ${{env.CLUSTER_NAME}}
-          location: ${{env.REGION}}
+          location: ${{env.ZONE}}
           project_id: ${{ env.PROJECT_ID }}
 
       - name: 'set image version'
