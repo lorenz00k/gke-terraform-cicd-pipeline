@@ -8,10 +8,12 @@ terraform.tfvars
 *.tfstate
 *.tfstate.backup
 .terraform.lock.hcl
+*.tfstate.lock.info
 
 __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 
-*docu/
+*intern_docu/
+/docs/diagrams/code
