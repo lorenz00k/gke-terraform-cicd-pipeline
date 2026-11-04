@@ -1,5 +1,10 @@
 # GKE Terraform CI/CD Pipeline
 
+[![CI](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/ci.yml)
+[![Security](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/security.yml/badge.svg)](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/security.yml)
+[![Deployment](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/deploy.yml/badge.svg)](https://github.com/lorenz00k/gke-terraform-cicd-pipeline/actions/workflows/deploy.yml)
+
+
 A containerized Flask app on Google Kubernetes Engine (GKE), with the infrastructure
 provisioned by Terraform and delivered through an automated GitHub Actions CI/CD pipeline.
 
@@ -51,6 +56,7 @@ If the check fails, the deployment is rolled back.
     gcloud auth login
     gcloud auth application-default login # for terraform
     ```
+
 2. **Provision the infrastructure:**
     ```bash
     cd terraform
@@ -59,7 +65,8 @@ If the check fails, the deployment is rolled back.
     ```
    Project-specific values go into `terraform/terraform.tfvars` (see `variables.tf`).
 <br>
-2. **Set up keyless authentication (Workload Identity Federation):** 
+
+3. **Set up keyless authentication (Workload Identity Federation):** 
 The included script creates the workload identity pool, an OIDC provider restricted to your repository and the `main` branch, and a service account with the roles `roles/artifactregistry.writer` and `roles/container.developer`. With `--set-github-variables` it also sets the two GitHub variables `WIF_PROVIDER` and `WIF_SERVICE_ACCOUNT`:
     ```bash
     gcloud auth login
@@ -70,12 +77,15 @@ The included script creates the workload identity pool, an OIDC provider restric
 
    If you prefer to set it up by hand, follow the walkthrough in [google-github-actions/auth](https://github.com/google-github-actions/auth) and create the same two variables. `WIF_PROVIDER` is the full resource name of the provider, `WIF_SERVICE_ACCOUNT` is the email of the service account.
 <br>
-3. **Match the workflow to your project:** 
+
+4. **Match the workflow to your project:** 
 The values in the `env` block of `.github/workflows/deploy.yml` (project, region, zone, repository, cluster) must match `terraform/variables.tf`.
 <br>
-4. **Deploy:** push to `main`, or run the `deployment` workflow from the Actions tab. After a fresh `terraform apply` nothing triggers a deploy on its own, so start it manually.
+
+5. **Deploy:** push to `main`, or run the `deployment` workflow from the Actions tab. After a fresh `terraform apply` nothing triggers a deploy on its own, so start it manually.
 <br>
-5. **Verify the deployment:** get the cluster credentials, then look up the external IP of the service and call the health endpoint:
+
+6. **Verify the deployment:** get the cluster credentials, then look up the external IP of the service and call the health endpoint:
     ```bash
     gcloud container clusters get-credentials gke-demo-cluster --zone europe-west3-a --project <project-id>
     kubectl get service app-service -n gke-terra
