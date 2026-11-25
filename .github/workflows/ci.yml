@@ -78,5 +78,11 @@ jobs:
         run: kubectl apply -k k8s-ci/
       
       - name: Post deploy check
-        run: bash tests/post_deploy_test.sh app-deployment app-service gke-terra
-      
+        run: bash tests/post_deploy_test.sh DEPLOYMENT=app-deployment SERVICE=app-service NAMEPSPACE=gke-terra LOCAL=1 ROLLBACK=0
+      - name: Dump cluster state on failure
+        if: failure()
+        run: |
+          kubectl get pods -A
+          kubectl describe pods
+          kubectl describe deployment app-deployment
+          kubectl logs deployment/app-deployment --tail=100
