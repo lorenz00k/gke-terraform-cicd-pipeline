@@ -12,7 +12,7 @@ resource "google_container_cluster" "primary" {
 
   resource_labels = {
     environment = "development"
-    team       = "lo"
+    team        = "lo"
   }
 
   deletion_protection = false

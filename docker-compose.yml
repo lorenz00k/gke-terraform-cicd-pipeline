@@ -1,0 +1,11 @@
+services:
+  app:
+    image: gke-demo-app:local
+    container_name: gke-app-local
+    ports:
+      - "8081:8080"
+
+  second-app:
+    image: gke-demo-app:local
+    container_name: gke-app-local2
+    

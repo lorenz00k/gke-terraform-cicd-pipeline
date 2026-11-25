@@ -56,3 +56,39 @@ jobs:
  
       - name: Smoke test
         run: bash tests/smoke_test.sh gke-demo-app:ci
+
+  kind-test:
+    name: Deploy to kind and test
+    runs-on: ubuntu-latest
+    needs: build-and-smoke-test
+    steps:
+      - uses: actions/checkout@v7
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.15.1
+        with:
+          cluster_name: ci
+
+      - name: Build image
+        run: docker build -t gke-demo-app:ci ./app
+      
+      - name: load image into kind
+        run: kind load docker-image gke-demo-app:ci --name ci
+      
+      - name: Apply ci Manifest
+        run: kubectl apply -k k8s-ci/
+      
+      - name: Post deploy check
+        env:
+          DEPLOYMENT: app-deployment
+          SERVICE: app-service
+          NAMESPACE: gke-terra
+          LOCAL: "1"
+          ROLLBACK: "0"
+        run: bash tests/post_deploy_test.sh
+      - name: Dump cluster state on failure
+        if: failure()
+        run: |
+          kubectl get pods -A
+          kubectl describe pods
+          kubectl describe deployment app-deployment
+          kubectl logs deployment/app-deployment --tail=100
