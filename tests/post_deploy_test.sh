@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Post-deploy test: wait for the rollout, then hit the live service.
-# Usage: scripts/post_deploy_test.sh <deployment> <service> [namespace]
+# Usage: tests/post_deploy_test.sh <deployment> <service> [namespace]
 # Rolls back the deployment if either step fails.
 set -euo pipefail
 
