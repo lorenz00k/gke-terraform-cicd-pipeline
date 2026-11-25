@@ -14,7 +14,7 @@ Build a small but complete delivery pipeline and show how a code change travels 
 commit to a running workload on Kubernetes without manual steps.
 
 - **Infrastructure as code:** the network, the GKE cluster and the container registry are defined in Terraform.
-- **Continuous integration:** every pull request is linted, type-checked, tested and scanned for security issues before it can be merged.
+- **Continuous integration:** every pull request is linted, type-checked, tested and scanned for security issues and the manifests are deployed to a throwaway local cluster (kind) and health-checked, before it can be merged.
 - **Continuous deployment:** a merge to `main` builds the image, pushes it to Artifact Registry and deploys it to GKE.
 - **Safe releases:** a post-deploy health check rolls back automatically if the new version does not come up.
 - **No stored credentials:** GitHub Actions authenticates to Google Cloud through Workload Identity Federation instead of a long-lived key.
@@ -44,6 +44,7 @@ If the check fails, the deployment is rolled back.
 - **Kubernetes (GKE):** runs the app, manifests applied with Kustomize
 - **GitHub Actions:** CI/CD workflows
 - **Python (Flask):** the demo app
+- **kind:** local Kubernetes cluster in CI, used to test the manifests before they reach GKE
 - **Google Cloud:** GKE, Artifact Registry, Workload Identity Federation
 - **Quality and security tools:** ruff, mypy, pytest, gitleaks, Bandit, pip-audit, Checkov, Trivy, Dependabot
 
@@ -102,7 +103,7 @@ The values in the `env` block of `.github/workflows/deploy.yml` (project, region
 - **Automatic rollback.** A deploy only counts once `/health` answers after the rollout. If it doesn't, the pipeline runs `kubectl rollout undo` and the workflow fails.
 - **Security findings are fixed or documented.** Five scans (gitleaks, Bandit, pip-audit, Checkov, Trivy) run on every pull request. Each finding is fixed or skipped with a reason in a comment next to the resource.
 - **Branch rules are the gate.** `main` requires a pull request and passing checks, and the deploy relies on that instead of re-running CI.
-
+- **Manifests are tested on a local cluster first.** CI builds the image, loads it into a kind cluster and applies the `k8s-ci/` overlay, which swaps in the local image. The same `tests/post_deploy_test.sh` that guards the GKE deploy runs against it (`LOCAL=1`, via port-forward, because kind never assigns a load balancer IP). Broken manifests or an unhealthy image fail the pull request instead of the deploy.
 ## Limitations & Next Steps
 
 - **Terraform runs locally.** The state is a local file. Next: remote state in a GCS bucket with locking, `terraform plan` on pull requests and `terraform apply` after a manual approval, using a separate, narrower service account.
