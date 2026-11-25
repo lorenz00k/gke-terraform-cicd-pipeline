@@ -81,4 +81,8 @@ jobs:
 
       # step 4: post deploy check -> rollback on failure
       - name: 'post deploy check'
-        run: bash tests/post_deploy_test.sh DEPLOYMENT=app-deployment SERVICE=app-service NAMESPACE=gke-terra
+        env:
+            DEPLOYMENT: app-deployment
+            SERVICE: app-service
+            NAMESPACE: gke-terra
+        run: bash tests/post_deploy_test.sh

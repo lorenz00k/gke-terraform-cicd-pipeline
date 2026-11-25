@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Post-deploy test: wait for the rollout, then hit the live service.
-# Usage: tests/post_deploy_test.sh <deployment> <service> [namespace]
+# Usage: DEPLOYMENT=<name> SERVICE=<name> [NAMESPACE=<ns>] tests/post_deploy_test.sh
 #
 # Env:
+#   DEPLOYMENT    deployment name (required)
+#   SERVICE       service name (required)
+#   NAMESPACE     namespace (default: default)
 #   LOCAL=1       reach the service via kubectl port-forward (kind/minikube)
 #                 instead of the LoadBalancer's external IP
 #   ROLLBACK=0    don't roll back on failure (default: 1)
@@ -14,9 +17,15 @@ NAMESPACE="${NAMESPACE:-default}"
 LOCAL="${LOCAL:-0}"
 ROLLBACK="${ROLLBACK:-1}"
 
+# clean-up port-foward: stopf pf & free port 
+PF_PID=""
+cleanup() { [ -n "$PF_PID" ] && kill "$PF_PID" 2>/dev/null || true; }
+trap cleanup EXIT
+
+
 fail() {
-  echo "Post-deploy test failed: $DEPLOYMENT" >&2
-  if ["$ROLLOUT" = "1"]; then
+  echo "Post-deploy test failed: $DEPLOYMENT: $1" >&2
+  if [ "$ROLLBACK" = "1" ]; then
     echo "Rolling back $DEPLOYMENT" >&2
     kubectl rollout undo "deployment/$DEPLOYMENT" -n "$NAMESPACE"
     kubectl rollout status "deployment/$DEPLOYMENT" -n "$NAMESPACE" --timeout=120s
@@ -27,7 +36,7 @@ fail() {
 echo "Waiting for rollout of $DEPLOYMENT ..."
 kubectl rollout status "deployment/$DEPLOYMENT" -n "$NAMESPACE" --timeout=180s || fail "Rollout did not complete"
 
-if ["$LOCAL" = "1"]; then
+if [ "$LOCAL" = "1" ]; then
   PORT=$(kubectl get svc "$SERVICE" -n "$NAMESPACE" -o jsonpath='{.spec.ports[0].port}')
   kubectl port-forward "svc/$SERVICE" 8080:"$PORT" -n "$NAMESPACE" >/dev/null 2>&1 &
   PF_PID=$!
@@ -41,7 +50,7 @@ else
     [ -n "$HOST" ] && break
     sleep 5
   done
-  [ -n "$HOST" ] || { echo "No external IP for service $SERVICE" >&2; }
+  [ -n "$HOST" ] || fail "No external IP for service $SERVICE"
 fi
 
 echo "Checking http://$HOST/health ..."
